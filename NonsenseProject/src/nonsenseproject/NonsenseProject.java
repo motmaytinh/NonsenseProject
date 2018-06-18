@@ -7,7 +7,7 @@ package nonsenseproject;
 
 /**
  *
- * @author cpu10745
+ * @author QuyTN
  */
 public class NonsenseProject {
 

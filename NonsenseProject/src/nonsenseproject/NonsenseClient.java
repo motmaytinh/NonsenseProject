@@ -49,19 +49,13 @@ public class NonsenseClient {
 
         Scanner scanner = new Scanner(System.in);
         do {
-            System.out.println("Ask or end?");
-            String choice = scanner.nextLine();
+            System.out.print("You: ");
+            String question = scanner.nextLine();
             
-            if (choice.equals("a")) {
-                System.out.println("What do you want to know?");
-                String question = scanner.nextLine();
-                answer ans = client.ask(question);
-                System.out.println(ans.getAnswer());
-            } else if (choice.equals("e")) {
-                client.endsession();
-                System.out.println("Goodbye!");
-                break;
-            }
+            if (question.equals("quit")) break;
+            
+            answer ans = client.ask(question);
+            System.out.println("Bot:" + ans.getAnswer());
         } while (true); //!inputString.equals("n")
     }
 }

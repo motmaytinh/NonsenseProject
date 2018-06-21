@@ -5,10 +5,17 @@
  */
 package nonsenseproject;
 
+import java.io.File;
+import org.alicebot.ab.Bot;
+import org.alicebot.ab.Chat;
+import org.alicebot.ab.History;
+import org.alicebot.ab.MagicBooleans;
+import org.alicebot.ab.MagicStrings;
+import org.alicebot.ab.utils.IOUtils;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.thrift.TException;
@@ -20,15 +27,26 @@ import nonsenseproject.*;
  * @author QuyTN
  */
 public class NonsenseHandler implements NonsenseService.Iface {
-    
+
+    private static final boolean TRACE_MODE = false;
+    static String botName = "super";
+    String resourcesPath = getResourcesPath();
+    //System.out.println(resourcesPath);
+    Bot bot = new Bot("super", resourcesPath);
+    Chat chatSession = new Chat(bot);
+    String textLine = "";
+
     public NonsenseHandler() {
-        
+        bot.brain.nodeStats();
+        MagicBooleans.trace_mode = TRACE_MODE;
     }
-    
+
     @Override
     public void log(String filename) {
         System.out.println("Write log to " + filename);
-    } ;
+    }
+
+    ;
     
     @Override
     public returnval upload(file upfile) {
@@ -43,18 +61,53 @@ public class NonsenseHandler implements NonsenseService.Iface {
         }
         System.out.println("File " + upfile.getName() + " received!");
         return new returnval(0, "test");
-    } 
+    }
 
     @Override
     public answer ask(String question) {
-        answer ans = new answer(0, " ", "This is a nonsense service");
-        System.out.println("Receive question: " + question);
+        System.out.print("Human : ");
+        textLine = question;
+        answer ans = new answer(0, "Service is temporary not available!", "");
+
+        if ((textLine == null) || (textLine.length() < 1)) {
+            textLine = MagicStrings.null_input;
+        }
+        if (textLine.equals("q")) {
+            System.exit(0);
+        } else if (textLine.equals("wq")) {
+            bot.writeQuit();
+            System.exit(0);
+        } else {
+            String request = textLine;
+            if (MagicBooleans.trace_mode) {
+                System.out.println("STATE=" + request + ":THAT=" + ((History) chatSession.thatHistory.get(0)).get(0) + ":TOPIC=" + chatSession.predicates.get("topic"));
+            }
+            String response = chatSession.multisentenceRespond(request);
+            while (response.contains("&lt;")) {
+                response = response.replace("&lt;", "<");
+            }
+            while (response.contains("&gt;")) {
+                response = response.replace("&gt;", ">");
+            }
+            System.out.println("Robot : " + response);
+            ans = new answer(0, " ", response);
+        }
+        
         return ans;
     }
     
     @Override
-    public void endsession() {
+        public void endsession() {
         System.out.println("End session!");
+    }
+    
+    private static String getResourcesPath() {
+        File currDir = new File(".");
+        String path = currDir.getAbsolutePath();
+        path = path.substring(0, path.length() - 2);
+        System.out.println(path);
+        String resourcesPath = path + File.separator;
+        return resourcesPath;
     }
     
 }
